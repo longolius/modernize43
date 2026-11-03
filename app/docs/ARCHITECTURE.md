@@ -12,18 +12,22 @@ flowchart LR
 ```
 
 - **C-01 Web interface** — a Python standard-library HTTP server (no third-party packages) serving
-  the form, the job page, the status JSON, the MP4 download with single-range support and a health
-  endpoint. It owns URL input display and error rendering.
+  the form with the logo select, the job page, the status JSON, the MP4 download with single-range
+  support and a health endpoint. It owns URL input display and error rendering.
 - **C-02 Job manager** — an in-memory job registry with a single worker thread and a FIFO queue. It
   creates a per-job temporary directory, moves a job through `queued` → `running` →
   `done`/`error`, enforces the 180-second budget, and deletes results after the retention time.
 - **C-03 Transcoder** — builds and runs the `ffmpeg` command: deinterlace when the source is
-  interlaced, cover-scale and blur the background, scale the foreground to height 1080, overlay it
-  centred, tag BT.709, encode H.264 CRF 20 with `yuv420p` and faststart, cap at 30 seconds, and
-  encode audio as AAC 192 kbit/s stereo. It is the only component that knows the filter graph.
+  interlaced, apply the detected border crop, cover-scale and blur the background, scale the
+  foreground to height 1080 with Lanczos and mild contrast-adaptive sharpening, overlay it centred,
+  optionally overlay the bundled logo in the foreground's top-left corner, tag BT.709, encode H.264
+  CRF 20 with `yuv420p` and faststart, cap at the requested seconds, and encode audio as AAC
+  192 kbit/s stereo. When an intro is selected it encodes the intro to the same parameters and
+  joins both parts with the concat demuxer. It is the only component that knows the filter graph.
 - **C-04 Source inspector** — validates and normalizes the submitted URL (scheme, host, no private
-  targets by default), probes with `ffprobe`, derives display aspect ratio, field order, audio
-  presence and duration, and turns tool errors into readable messages.
+  targets by default), probes with `ffprobe`, detects black borders with `cropdetect` on a short
+  sample, derives the cropped display aspect ratio, field order, audio presence and duration, and
+  turns tool errors into readable messages.
 
 Dependencies: C-01 → C-02; C-02 → C-03 and C-04; C-03 → C-04. There is no cycle.
 

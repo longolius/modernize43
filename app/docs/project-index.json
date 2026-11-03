@@ -6,10 +6,16 @@
   "current_scope": [
     "one direct http(s) media url per job",
     "first 30 seconds only",
+    "automatic black-border cropping",
+    "lanczos upscaling with contrast-adaptive sharpening",
+    "optional joyn logo overlay from a dropdown",
     "blurred pillarbox composition without distortion",
     "job states and error messages",
     "html5 player and mp4 download",
-    "private-address rejection by default"
+    "private-address rejection by default",
+    "optional 16:9 joyn intro prepended in full",
+    "configurable content duration, default 30 seconds",
+    "arabella 480p source preset"
   ],
   "out_of_scope": [
     "batch processing",
@@ -25,32 +31,74 @@
   "stories": [
     {
       "id": "S-01",
-      "requirements": ["R-01", "R-03", "R-04", "R-06", "R-07"],
-      "acceptance": ["A-01", "A-03", "A-04", "A-06", "A-07"],
+      "requirements": [
+        "R-01",
+        "R-03",
+        "R-04",
+        "R-06",
+        "R-07",
+        "R-11",
+        "R-12",
+        "R-13",
+        "R-14",
+        "R-15"
+      ],
+      "acceptance": [
+        "A-01",
+        "A-03",
+        "A-04",
+        "A-06",
+        "A-07",
+        "A-11",
+        "A-12",
+        "A-13",
+        "A-14",
+        "A-15"
+      ],
       "source_file": "STORIES.md"
     },
     {
       "id": "S-02",
-      "requirements": ["R-02", "R-08"],
-      "acceptance": ["A-02", "A-08"],
+      "requirements": [
+        "R-02",
+        "R-08"
+      ],
+      "acceptance": [
+        "A-02",
+        "A-08"
+      ],
       "source_file": "STORIES.md"
     },
     {
       "id": "S-03",
-      "requirements": ["R-05", "R-09"],
-      "acceptance": ["A-05", "A-09"],
+      "requirements": [
+        "R-05",
+        "R-09"
+      ],
+      "acceptance": [
+        "A-05",
+        "A-09"
+      ],
       "source_file": "STORIES.md"
     },
     {
       "id": "S-04",
-      "requirements": ["R-07"],
-      "acceptance": ["A-07"],
+      "requirements": [
+        "R-07"
+      ],
+      "acceptance": [
+        "A-07"
+      ],
       "source_file": "STORIES.md"
     },
     {
       "id": "S-05",
-      "requirements": ["R-10"],
-      "acceptance": ["A-10"],
+      "requirements": [
+        "R-10"
+      ],
+      "acceptance": [
+        "A-10"
+      ],
       "source_file": "STORIES.md"
     }
   ],
@@ -58,87 +106,266 @@
     {
       "id": "R-01",
       "owner": "C-01",
-      "acceptance": ["A-01"],
+      "acceptance": [
+        "A-01"
+      ],
       "source_file": "REQUIREMENTS.md"
     },
     {
       "id": "R-02",
       "owner": "C-04",
-      "acceptance": ["A-02"],
+      "acceptance": [
+        "A-02"
+      ],
       "source_file": "REQUIREMENTS.md"
     },
     {
       "id": "R-03",
       "owner": "C-03",
-      "acceptance": ["A-03"],
+      "acceptance": [
+        "A-03"
+      ],
       "source_file": "REQUIREMENTS.md"
     },
     {
       "id": "R-04",
       "owner": "C-03",
-      "acceptance": ["A-04"],
+      "acceptance": [
+        "A-04"
+      ],
       "source_file": "REQUIREMENTS.md"
     },
     {
       "id": "R-05",
       "owner": "C-02",
-      "acceptance": ["A-05"],
+      "acceptance": [
+        "A-05"
+      ],
       "source_file": "REQUIREMENTS.md"
     },
     {
       "id": "R-06",
       "owner": "C-01",
-      "acceptance": ["A-06"],
+      "acceptance": [
+        "A-06"
+      ],
       "source_file": "REQUIREMENTS.md"
     },
     {
       "id": "R-07",
       "owner": "C-03",
-      "acceptance": ["A-07"],
+      "acceptance": [
+        "A-07"
+      ],
       "source_file": "REQUIREMENTS.md"
     },
     {
       "id": "R-08",
       "owner": "C-04",
-      "acceptance": ["A-08"],
+      "acceptance": [
+        "A-08"
+      ],
       "source_file": "REQUIREMENTS.md"
     },
     {
       "id": "R-09",
       "owner": "C-02",
-      "acceptance": ["A-09"],
+      "acceptance": [
+        "A-09"
+      ],
       "source_file": "REQUIREMENTS.md"
     },
     {
       "id": "R-10",
       "owner": "C-04",
-      "acceptance": ["A-10"],
+      "acceptance": [
+        "A-10"
+      ],
+      "source_file": "REQUIREMENTS.md"
+    },
+    {
+      "id": "R-11",
+      "owner": "C-04",
+      "acceptance": [
+        "A-11"
+      ],
+      "source_file": "REQUIREMENTS.md"
+    },
+    {
+      "id": "R-12",
+      "owner": "C-03",
+      "acceptance": [
+        "A-12"
+      ],
+      "source_file": "REQUIREMENTS.md"
+    },
+    {
+      "id": "R-13",
+      "owner": "C-03",
+      "acceptance": [
+        "A-13"
+      ],
+      "source_file": "REQUIREMENTS.md"
+    },
+    {
+      "id": "R-14",
+      "owner": "C-02",
+      "acceptance": [
+        "A-14"
+      ],
+      "source_file": "REQUIREMENTS.md"
+    },
+    {
+      "id": "R-15",
+      "owner": "C-01",
+      "acceptance": [
+        "A-15"
+      ],
       "source_file": "REQUIREMENTS.md"
     }
   ],
   "acceptance": [
-    {"id": "A-01", "requirement": "R-01", "oracle_id": "O-01", "source_file": "ACCEPTANCE.md"},
-    {"id": "A-02", "requirement": "R-02", "oracle_id": "O-01", "source_file": "ACCEPTANCE.md"},
-    {"id": "A-03", "requirement": "R-03", "oracle_id": "O-01", "source_file": "ACCEPTANCE.md"},
-    {"id": "A-04", "requirement": "R-04", "oracle_id": "O-01", "source_file": "ACCEPTANCE.md"},
-    {"id": "A-05", "requirement": "R-05", "oracle_id": "O-01", "source_file": "ACCEPTANCE.md"},
-    {"id": "A-06", "requirement": "R-06", "oracle_id": "O-01", "source_file": "ACCEPTANCE.md"},
-    {"id": "A-07", "requirement": "R-07", "oracle_id": "O-01", "source_file": "ACCEPTANCE.md"},
-    {"id": "A-08", "requirement": "R-08", "oracle_id": "O-01", "source_file": "ACCEPTANCE.md"},
-    {"id": "A-09", "requirement": "R-09", "oracle_id": "O-01", "source_file": "ACCEPTANCE.md"},
-    {"id": "A-10", "requirement": "R-10", "oracle_id": "O-01", "source_file": "ACCEPTANCE.md"}
+    {
+      "id": "A-01",
+      "requirement": "R-01",
+      "oracle_id": "O-01",
+      "source_file": "ACCEPTANCE.md"
+    },
+    {
+      "id": "A-02",
+      "requirement": "R-02",
+      "oracle_id": "O-01",
+      "source_file": "ACCEPTANCE.md"
+    },
+    {
+      "id": "A-03",
+      "requirement": "R-03",
+      "oracle_id": "O-01",
+      "source_file": "ACCEPTANCE.md"
+    },
+    {
+      "id": "A-04",
+      "requirement": "R-04",
+      "oracle_id": "O-01",
+      "source_file": "ACCEPTANCE.md"
+    },
+    {
+      "id": "A-05",
+      "requirement": "R-05",
+      "oracle_id": "O-01",
+      "source_file": "ACCEPTANCE.md"
+    },
+    {
+      "id": "A-06",
+      "requirement": "R-06",
+      "oracle_id": "O-01",
+      "source_file": "ACCEPTANCE.md"
+    },
+    {
+      "id": "A-07",
+      "requirement": "R-07",
+      "oracle_id": "O-01",
+      "source_file": "ACCEPTANCE.md"
+    },
+    {
+      "id": "A-08",
+      "requirement": "R-08",
+      "oracle_id": "O-01",
+      "source_file": "ACCEPTANCE.md"
+    },
+    {
+      "id": "A-09",
+      "requirement": "R-09",
+      "oracle_id": "O-01",
+      "source_file": "ACCEPTANCE.md"
+    },
+    {
+      "id": "A-10",
+      "requirement": "R-10",
+      "oracle_id": "O-01",
+      "source_file": "ACCEPTANCE.md"
+    },
+    {
+      "id": "A-11",
+      "requirement": "R-11",
+      "oracle_id": "O-01",
+      "source_file": "ACCEPTANCE.md"
+    },
+    {
+      "id": "A-12",
+      "requirement": "R-12",
+      "oracle_id": "O-01",
+      "source_file": "ACCEPTANCE.md"
+    },
+    {
+      "id": "A-13",
+      "requirement": "R-13",
+      "oracle_id": "O-01",
+      "source_file": "ACCEPTANCE.md"
+    },
+    {
+      "id": "A-14",
+      "requirement": "R-14",
+      "oracle_id": "O-01",
+      "source_file": "ACCEPTANCE.md"
+    },
+    {
+      "id": "A-15",
+      "requirement": "R-15",
+      "oracle_id": "O-01",
+      "source_file": "ACCEPTANCE.md"
+    }
   ],
   "components": [
-    {"id": "C-01", "depends_on": ["C-02"], "source_file": "ARCHITECTURE.md"},
-    {"id": "C-02", "depends_on": ["C-03", "C-04"], "source_file": "ARCHITECTURE.md"},
-    {"id": "C-03", "depends_on": ["C-04"], "source_file": "ARCHITECTURE.md"},
-    {"id": "C-04", "depends_on": [], "source_file": "ARCHITECTURE.md"}
+    {
+      "id": "C-01",
+      "depends_on": [
+        "C-02"
+      ],
+      "source_file": "ARCHITECTURE.md"
+    },
+    {
+      "id": "C-02",
+      "depends_on": [
+        "C-03",
+        "C-04"
+      ],
+      "source_file": "ARCHITECTURE.md"
+    },
+    {
+      "id": "C-03",
+      "depends_on": [
+        "C-04"
+      ],
+      "source_file": "ARCHITECTURE.md"
+    },
+    {
+      "id": "C-04",
+      "depends_on": [],
+      "source_file": "ARCHITECTURE.md"
+    }
   ],
   "oracles": [
     {
       "id": "O-01",
       "path": "tests/acceptance.py",
-      "acceptance_ids": ["A-01", "A-02", "A-03", "A-04", "A-05", "A-06", "A-07", "A-08", "A-09", "A-10"]
+      "acceptance_ids": [
+        "A-01",
+        "A-02",
+        "A-03",
+        "A-04",
+        "A-05",
+        "A-06",
+        "A-07",
+        "A-08",
+        "A-09",
+        "A-10",
+        "A-11",
+        "A-12",
+        "A-13",
+        "A-14",
+        "A-15"
+      ]
     }
   ],
   "open_decisions": [],

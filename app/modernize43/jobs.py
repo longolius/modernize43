@@ -8,7 +8,7 @@ import threading
 import time
 import uuid
 
-from .source import SourceError, probe
+from .source import INTRO_URL, SourceError, probe
 from .transcode import transcode
 
 JOB_TIMEOUT_SECONDS = 180
@@ -16,9 +16,12 @@ RETENTION_MINUTES = 60
 
 
 class Job:
-    def __init__(self, url):
+    def __init__(self, url, logo="none", seconds=30, intro="none"):
         self.id = uuid.uuid4().hex[:10]
         self.url = url
+        self.logo = logo
+        self.seconds = seconds
+        self.intro = intro
         self.state = "queued"
         self.message = ""
         self.directory = None
@@ -46,8 +49,8 @@ class JobManager:
         threading.Thread(target=self._work, daemon=True).start()
         threading.Thread(target=self._clean, daemon=True).start()
 
-    def create(self, url):
-        job = Job(url)
+    def create(self, url, logo="none", seconds=30, intro="none"):
+        job = Job(url, logo, seconds, intro)
         with self.lock:
             self.jobs[job.id] = job
         self.queue.put(job)
@@ -78,7 +81,9 @@ class JobManager:
                 if remaining <= 0:
                     raise SourceError("Das Zeitlimit von %d Sekunden ist überschritten."
                                       % self.timeout)
-                transcode(job.url, output, info, timeout=int(remaining))
+                transcode(job.url, output, info, timeout=int(remaining), logo=job.logo,
+                          seconds=job.seconds,
+                          intro_url=INTRO_URL if job.intro == "joyn" else None)
                 if not os.path.isfile(output) or os.path.getsize(output) == 0:
                     raise SourceError("Es wurde keine Ausgabedatei erzeugt.")
                 with self.lock:

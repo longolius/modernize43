@@ -22,3 +22,20 @@
   scope and must be arranged outside this project.
 - D-11: The service is single-user with no authentication. It must not be exposed publicly in this
   revision.
+- D-12: Black borders are detected with `cropdetect` on at most the first five seconds and cropped
+  before any scaling, capped at 20% per side. Upscaling uses Lanczos plus contrast-adaptive
+  sharpening at strength 0.35 on the foreground only; denoising and grain management are not
+  enabled by default because they remove texture the archive may want to keep.
+- D-13: The logo is a bundled asset, not a runtime download: the white Joyn wordmark with a soft
+  drop shadow, rasterised from the Wikimedia SVG, 32-pixel margin in the foreground's top-left
+  corner and 16% of the foreground width. Attribution and trademark note live in
+  `assets/README.md`. The dropdown is the only selector; no arbitrary logo URLs.
+- D-14: The intro is a 16:9 asset and is prepended as-is, normalised to 1920×1080, square pixels,
+  BT.709, the content's frame rate and AAC 48 kHz stereo. It is encoded once and joined with the
+  content through the concat demuxer, so the boundary costs no extra re-encode. A silent content
+  gets a silent audio track when an intro is present, otherwise the concat would fail.
+- D-15: `seconds` applies to the content only; the intro adds its own length. Default 30, range
+  1–600. This keeps "30 seconds of film" true when an intro is selected.
+- D-16: The Arabella preset and the intro URL are fixed server-side and can be overridden with
+  `MODERNIZE43_ARABELLA_URL` / `MODERNIZE43_INTRO_URL` for the acceptance oracle. The UI never
+  accepts arbitrary preset URLs.

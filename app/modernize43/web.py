@@ -7,7 +7,7 @@ import re
 import urllib.parse
 from http.server import BaseHTTPRequestHandler
 
-from .source import SourceError, validate_url
+from .source import ARABELLA_URL, SourceError, validate_url
 
 JOB_PATH = re.compile(r"^/jobs/([A-Za-z0-9]+)$")
 STATUS_PATH = re.compile(r"^/jobs/([A-Za-z0-9]+)/status$")
@@ -43,14 +43,29 @@ def page(title, body):
             % (html.escape(title), STYLE, body))
 
 
-def form(value=""):
+def select(name, choices, current):
+    options = "".join(
+        "<option value=\"%s\"%s>%s</option>" % (value, " selected" if value == current else "", label)
+        for value, label in choices)
+    return "<select name=\"%s\">%s</select>" % (name, options)
+
+
+def form(value="", logo="none", intro="none", source="url", seconds=30):
     return ("<h1>modernize43</h1>"
-            "<p class=\"lead\">4:3-Film-URL einfügen. Die ersten 30 Sekunden werden als "
+            "<p class=\"lead\">Film-URL einfügen. Die ersten Sekunden werden als "
             "1920×1080 mit unscharfem Hintergrund ausgegeben.</p>"
             "<form action=\"/jobs\" method=\"post\">"
-            "<input type=\"url\" name=\"url\" required placeholder=\"https://…/film.mp4\" "
-            "value=\"%s\"><button type=\"submit\">Modernisieren</button></form>"
-            % html.escape(value))
+            "<input type=\"url\" name=\"url\" placeholder=\"https://…/film.mp4\" "
+            "value=\"%s\">"
+            "%s%s%s"
+            "<input type=\"number\" name=\"seconds\" min=\"1\" max=\"600\" "
+            "value=\"%d\" title=\"Sekunden des Films\">"
+            "<button type=\"submit\">Modernisieren</button></form>"
+            % (html.escape(value),
+               select("source", (("url", "Eigene URL"), ("arabella", "Arabella SD 480p")), source),
+               select("logo", (("none", "Kein Logo"), ("joyn", "Joyn oben links")), logo),
+               select("intro", (("none", "Ohne Vorspann"), ("joyn", "Joyn-Vorspann")), intro),
+               seconds))
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -95,14 +110,35 @@ class Handler(BaseHTTPRequestHandler):
         body = self.rfile.read(length).decode("utf-8", "replace") if length else ""
         fields = urllib.parse.parse_qs(body, keep_blank_values=True)
         value = (fields.get("url") or [""])[0]
+        logo = (fields.get("logo") or ["none"])[0]
+        intro = (fields.get("intro") or ["none"])[0]
+        source = (fields.get("source") or ["url"])[0]
         try:
-            url = validate_url(value, self.manager.allow_private)
+            seconds = int((fields.get("seconds") or ["30"])[0])
+        except ValueError:
+            seconds = 0
+        problem = None
+        if logo not in ("none", "joyn"):
+            problem = "Unbekannte Logo-Option."
+        elif intro not in ("none", "joyn"):
+            problem = "Unbekannte Vorspann-Option."
+        elif source not in ("url", "arabella"):
+            problem = "Unbekannte Quelle."
+        elif not 1 <= seconds <= 600:
+            problem = "Die Dauer muss zwischen 1 und 600 Sekunden liegen."
+        if problem:
+            self.send_html(400, page("Fehler", form(value, logo, intro, source, seconds if seconds else 30) +
+                                     "<div class=\"status error\">%s</div>" % problem))
+            return
+        candidate = ARABELLA_URL if source == "arabella" else value
+        try:
+            url = validate_url(candidate, self.manager.allow_private)
         except SourceError as exc:
-            self.send_html(400, page("Fehler", form(value) +
+            self.send_html(400, page("Fehler", form(value, logo, intro, source, seconds) +
                                      "<div class=\"status error\">%s</div>"
                                      % html.escape(str(exc))))
             return
-        job = self.manager.create(url)
+        job = self.manager.create(url, logo, seconds, intro)
         self.send_response(303)
         self.send_header("Location", "/jobs/%s" % job.id)
         self.send_header("Content-Length", "0")

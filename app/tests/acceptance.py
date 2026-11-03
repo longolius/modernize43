@@ -153,11 +153,18 @@ def wait_final(base, job_id, timeout=300):
 
 class FixtureHandler(http.server.BaseHTTPRequestHandler):
     directory = ""
+    protocol_version = "HTTP/1.1"
 
     def log_message(self, *args):
         pass
 
+    def do_HEAD(self):
+        self.serve(False)
+
     def do_GET(self):
+        self.serve(True)
+
+    def serve(self, with_body):
         path = urllib.parse.urlparse(self.path).path
         if path == "/missing.mp4":
             body = b"not here"
@@ -165,7 +172,8 @@ class FixtureHandler(http.server.BaseHTTPRequestHandler):
             self.send_header("Content-Type", "text/plain")
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()
-            self.wfile.write(body)
+            if with_body:
+                self.wfile.write(body)
             return
         if path == "/notmedia.html":
             body = b"<html><body>no media</body></html>"
@@ -173,7 +181,8 @@ class FixtureHandler(http.server.BaseHTTPRequestHandler):
             self.send_header("Content-Type", "text/html")
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()
-            self.wfile.write(body)
+            if with_body:
+                self.wfile.write(body)
             return
         name = os.path.basename(path)
         target = os.path.join(self.directory, name)
@@ -181,16 +190,44 @@ class FixtureHandler(http.server.BaseHTTPRequestHandler):
             self.send_error(404)
             return
         size = os.path.getsize(target)
-        self.send_response(200)
+        start, end, status = 0, size - 1, 200
+        header = self.headers.get("Range", "").strip()
+        if header.startswith("bytes="):
+            left, _, right = header[6:].partition("-")
+            try:
+                if left == "":
+                    start = max(0, size - int(right))
+                else:
+                    start = int(left)
+                    end = int(right) if right else size - 1
+            except ValueError:
+                start, end = 0, size - 1
+            if 0 <= start <= end < size:
+                status = 206
+            else:
+                start, end, status = 0, size - 1, 200
+        length = end - start + 1
+        self.send_response(status)
         self.send_header("Content-Type", "video/mp4")
-        self.send_header("Content-Length", str(size))
+        self.send_header("Accept-Ranges", "bytes")
+        self.send_header("Content-Length", str(length))
+        if status == 206:
+            self.send_header("Content-Range", "bytes %d-%d/%d" % (start, end, size))
         self.end_headers()
+        if not with_body:
+            return
         with open(target, "rb") as handle:
-            while True:
-                chunk = handle.read(1 << 16)
+            handle.seek(start)
+            remaining = length
+            while remaining > 0:
+                chunk = handle.read(min(1 << 16, remaining))
                 if not chunk:
                     break
-                self.wfile.write(chunk)
+                try:
+                    self.wfile.write(chunk)
+                except (BrokenPipeError, ConnectionResetError):
+                    return
+                remaining -= len(chunk)
 
 
 def start_fixture_server(directory):
@@ -277,9 +314,14 @@ def band_luma(rows, start, end):
 def check_composition(path):
     rows = luma_rows(frame_rgb(path, 10))
     profile = column_profile(rows)
-    center = statistics.median(profile[800:1200])
-    if center < 0.5:
-        fail("centre band has no detail; cannot verify composition")
+    center_peak = max(profile[700:1250])
+    if center_peak < 2.0:
+        fail("centre band has no sharp detail (peak %.2f)" % center_peak)
+    left_peak = max(profile[0:200])
+    right_peak = max(profile[1720:1919])
+    if left_peak > 0.25 * center_peak or right_peak > 0.25 * center_peak:
+        fail("side bands are not smoother than the centre "
+             "(left %.2f right %.2f centre %.2f)" % (left_peak, right_peak, center_peak))
     left_window = profile[180:300]
     right_window = profile[1620:1740]
     left_seam = 180 + left_window.index(max(left_window))
@@ -291,11 +333,6 @@ def check_composition(path):
     width = right_seam - left_seam
     if not 1420 <= width <= 1460:
         fail("sharp band width %d, expected about 1440" % width)
-    left_detail = band_mean(profile, 0, 200)
-    right_detail = band_mean(profile, 1720, 1919)
-    if left_detail > 0.5 * center or right_detail > 0.5 * center:
-        fail("side bands are not smoother than the centre (left %.2f right %.2f centre %.2f)"
-             % (left_detail, right_detail, center))
     for name, start, end in (("left", 0, 200), ("right", 1720, 1919)):
         mean = band_luma(rows, start, end)
         if mean <= 8:

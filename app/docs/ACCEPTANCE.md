@@ -5,8 +5,9 @@ public HTTP interface only and inspects the produced file with `ffprobe` and raw
 The composition check is statistical by design; it does not read the filter graph.
 
 - A-01: Given a running service and a reachable 4:3 MP4 fixture, when the user opens `GET /` and
-  posts its URL to `/jobs`, then the form contains an input named `url`, the response is `303` with
-  a `Location` of `/jobs/<id>`, and `GET /jobs/<id>` answers `200`.
+  posts its URL to `/jobs`, then the form contains an input named `url` and a select named `logo`
+  with a `joyn` option, the response is `303` with a `Location` of `/jobs/<id>`, and
+  `GET /jobs/<id>` answers `200`.
 - A-02: Given the same service, when the user posts `file:///etc/passwd`, an empty value and a
   relative path, then each request answers `400`, the body names the problem, and no job page is
   created.
@@ -40,3 +41,7 @@ The composition check is statistical by design; it does not read the filter grap
   704×576, SAR 16:15), when its job finishes, then the sharp band is 1408 ± 16 pixels wide and
   centred at 960 ± 40, the side bands are non-black and smoother than the centre, and no column
   within 8 pixels inside either seam is near-black (mean luma above 8).
+- A-12: Given the same 4:3 source, when one job is submitted with `logo=none` and one with
+  `logo=joyn`, then both finish and, in a frame taken at 10 seconds, the mean absolute luma
+  difference in the top-left foreground area (x 260–500, y 40–150) is at least 2 and at least four
+  times the difference measured in a control area lower in the frame (x 260–500, y 700–810).

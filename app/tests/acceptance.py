@@ -67,8 +67,10 @@ def request(url, method="GET", data=None, headers=None, timeout=60):
         return exc.code, dict(exc.headers), exc.read()
 
 
-def form_post(base, url_value):
-    data = urllib.parse.urlencode({"url": url_value}).encode()
+def form_post(base, url_value, extra=None):
+    fields = {"url": url_value}
+    fields.update(extra or {})
+    data = urllib.parse.urlencode(fields).encode()
     return request(base + "/jobs", "POST", data,
                    {"Content-Type": "application/x-www-form-urlencoded"})
 
@@ -115,8 +117,8 @@ def stop_app(proc):
         proc.wait(timeout=10)
 
 
-def submit(base, url_value):
-    status, headers, body = form_post(base, url_value)
+def submit(base, url_value, extra=None):
+    status, headers, body = form_post(base, url_value, extra)
     if status != 303:
         fail("POST /jobs must answer 303, got %s: %s" % (status, body[:300]))
     location = headers.get("Location", "")
@@ -317,6 +319,20 @@ def band_luma(rows, start, end):
     return total / float(count)
 
 
+def diff_region(first, second, x0, y0, x1, y1):
+    total = 0
+    count = 0
+    for y in range(y0, y1, 2):
+        base = y * 1920 * 3
+        for x in range(x0, x1, 2):
+            i = base + x * 3
+            total += abs(first[i] - second[i])
+            total += abs(first[i + 1] - second[i + 1])
+            total += abs(first[i + 2] - second[i + 2])
+            count += 3
+    return total / float(count)
+
+
 def check_composition(path, at=10, left_expected=240, right_expected=1680,
                       width_range=(1420, 1460), border_probe=None):
     rows = luma_rows(frame_rgb(path, at))
@@ -387,6 +403,8 @@ def main():
         html = body.decode("utf-8", "replace")
         if 'name="url"' not in html or "<form" not in html.lower():
             fail("GET / has no url input form")
+        if 'name="logo"' not in html or 'value="joyn"' not in html:
+            fail("GET / has no logo select with a joyn option")
         job_id = submit(base, media)
         status, _, _ = request(base + "/jobs/%s" % job_id)
         if status != 200:
@@ -477,6 +495,27 @@ def main():
                                                left_expected=256, right_expected=1664,
                                                width_range=(1392, 1424), border_probe=10)
         ok("A-11", "seams %d/%d width %d" % (left, right, width))
+
+        # A-12 optional logo overlay
+        logo_job = submit(base, media, {"logo": "joyn"})
+        logo_payload, _ = wait_final(base, logo_job)
+        if logo_payload["state"] != "done":
+            fail("logo job ended in %s: %s"
+                 % (logo_payload["state"], logo_payload.get("message")))
+        logo_path = os.path.join(work, "logo-out.mp4")
+        status, _, blob = request(base + "/jobs/%s/result.mp4" % logo_job)
+        if status != 200:
+            fail("logo result answered %s" % status)
+        with open(logo_path, "wb") as handle:
+            handle.write(blob)
+        plain_frame = frame_rgb(result_path, 10)
+        logo_frame = frame_rgb(logo_path, 10)
+        logo_diff = diff_region(plain_frame, logo_frame, 260, 40, 500, 150)
+        control_diff = diff_region(plain_frame, logo_frame, 260, 700, 500, 810)
+        if logo_diff < 2.0 or logo_diff < 4 * (control_diff + 0.05):
+            fail("logo overlay not visible (logo diff %.2f, control diff %.2f)"
+                 % (logo_diff, control_diff))
+        ok("A-12", "logo diff %.1f control %.1f" % (logo_diff, control_diff))
 
         # A-07 duration and audio
         duration = float(meta.get("format", {}).get("duration", "0"))

@@ -1,8 +1,9 @@
 # Normative requirements
 
-- R-01: `GET /` returns an HTML page with a form that has one text input named `url` and a submit
-  control. `POST /jobs` with `application/x-www-form-urlencoded` and a `url` field creates a job and
-  answers `303` with `Location: /jobs/<id>`. The job page `GET /jobs/<id>` exists immediately.
+- R-01: `GET /` returns an HTML page with a form that has one text input named `url`, a select
+  named `logo` whose options include `none` and `joyn`, and a submit control. `POST /jobs` with
+  `application/x-www-form-urlencoded` and a `url` field creates a job and answers `303` with
+  `Location: /jobs/<id>`. The job page `GET /jobs/<id>` exists immediately.
 - R-02: The `url` value must be an absolute `http://` or `https://` URL with a non-empty host.
   Anything else, including `file:`, `ftp:`, relative paths and empty input, is rejected with HTTP
   `400` and an HTML or text response that names the problem; no job is created.
@@ -47,3 +48,9 @@
   a detected crop is applied before scaling. At most 20% of the width and of the height may be
   removed per side. If no border is detected the frame is used unchanged. The border-cropped
   geometry, not the raw source geometry, determines the foreground width and the aspect-ratio gate.
+- R-12: `POST /jobs` accepts an optional `logo` field. The value `none`, which is also the default,
+  leaves the frame unchanged. The value `joyn` draws the bundled white Joyn wordmark with a dark
+  drop shadow inside the top-left corner of the foreground area: 32 pixels from the top and from
+  the foreground's left edge, with a width of 16% of the foreground width and never more than 20%
+  of it. Any other value is rejected with HTTP `400` and no job is created. The logo is never
+  fetched from the network at request time.

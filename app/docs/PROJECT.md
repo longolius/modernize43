@@ -13,6 +13,7 @@ stretched or cropped.
 - One direct HTTP(S) media URL per job, entered in a web form.
 - Only the first 30 seconds of the source are transcoded; a shorter source yields the whole source.
 - Black borders around the source image are detected and cropped before scaling.
+- A logo can be overlaid in the top-left corner of the 4:3 content, chosen from a dropdown.
 - Output is 1920×1080 H.264 in MP4 with AAC audio, correct SAR, BT.709 tags and faststart.
 - SD footage is upscaled with Lanczos and mild contrast-adaptive sharpening.
 - The job page shows queued, running, done or failed.

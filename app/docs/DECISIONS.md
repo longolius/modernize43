@@ -26,3 +26,7 @@
   before any scaling, capped at 20% per side. Upscaling uses Lanczos plus contrast-adaptive
   sharpening at strength 0.35 on the foreground only; denoising and grain management are not
   enabled by default because they remove texture the archive may want to keep.
+- D-13: The logo is a bundled asset, not a runtime download: the white Joyn wordmark with a soft
+  drop shadow, rasterised from the Wikimedia SVG, 32-pixel margin in the foreground's top-left
+  corner and 16% of the foreground width. Attribution and trademark note live in
+  `assets/README.md`. The dropdown is the only selector; no arbitrary logo URLs.

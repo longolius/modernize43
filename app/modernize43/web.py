@@ -43,14 +43,18 @@ def page(title, body):
             % (html.escape(title), STYLE, body))
 
 
-def form(value=""):
+def form(value="", logo="none"):
+    options = "".join(
+        "<option value=\"%s\"%s>%s</option>" % (name, " selected" if name == logo else "", label)
+        for name, label in (("none", "Kein Logo"), ("joyn", "Joyn oben links")))
     return ("<h1>modernize43</h1>"
             "<p class=\"lead\">4:3-Film-URL einfügen. Die ersten 30 Sekunden werden als "
             "1920×1080 mit unscharfem Hintergrund ausgegeben.</p>"
             "<form action=\"/jobs\" method=\"post\">"
             "<input type=\"url\" name=\"url\" required placeholder=\"https://…/film.mp4\" "
-            "value=\"%s\"><button type=\"submit\">Modernisieren</button></form>"
-            % html.escape(value))
+            "value=\"%s\"><select name=\"logo\">%s</select>"
+            "<button type=\"submit\">Modernisieren</button></form>"
+            % (html.escape(value), options))
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -95,14 +99,19 @@ class Handler(BaseHTTPRequestHandler):
         body = self.rfile.read(length).decode("utf-8", "replace") if length else ""
         fields = urllib.parse.parse_qs(body, keep_blank_values=True)
         value = (fields.get("url") or [""])[0]
+        logo = (fields.get("logo") or ["none"])[0]
+        if logo not in ("none", "joyn"):
+            self.send_html(400, page("Fehler", form(value, "none") +
+                                     "<div class=\"status error\">Unbekannte Logo-Option.</div>"))
+            return
         try:
             url = validate_url(value, self.manager.allow_private)
         except SourceError as exc:
-            self.send_html(400, page("Fehler", form(value) +
+            self.send_html(400, page("Fehler", form(value, logo) +
                                      "<div class=\"status error\">%s</div>"
                                      % html.escape(str(exc))))
             return
-        job = self.manager.create(url)
+        job = self.manager.create(url, logo)
         self.send_response(303)
         self.send_header("Location", "/jobs/%s" % job.id)
         self.send_header("Content-Length", "0")

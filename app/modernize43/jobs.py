@@ -16,9 +16,10 @@ RETENTION_MINUTES = 60
 
 
 class Job:
-    def __init__(self, url):
+    def __init__(self, url, logo="none"):
         self.id = uuid.uuid4().hex[:10]
         self.url = url
+        self.logo = logo
         self.state = "queued"
         self.message = ""
         self.directory = None
@@ -46,8 +47,8 @@ class JobManager:
         threading.Thread(target=self._work, daemon=True).start()
         threading.Thread(target=self._clean, daemon=True).start()
 
-    def create(self, url):
-        job = Job(url)
+    def create(self, url, logo="none"):
+        job = Job(url, logo)
         with self.lock:
             self.jobs[job.id] = job
         self.queue.put(job)
@@ -78,7 +79,7 @@ class JobManager:
                 if remaining <= 0:
                     raise SourceError("Das Zeitlimit von %d Sekunden ist überschritten."
                                       % self.timeout)
-                transcode(job.url, output, info, timeout=int(remaining))
+                transcode(job.url, output, info, timeout=int(remaining), logo=job.logo)
                 if not os.path.isfile(output) or os.path.getsize(output) == 0:
                     raise SourceError("Es wurde keine Ausgabedatei erzeugt.")
                 with self.lock:

@@ -1,0 +1,8 @@
+services:
+  modernize43:
+    build: .
+    image: modernize43:0.1.0
+    container_name: modernize43
+    restart: unless-stopped
+    ports:
+      - "100.64.0.18:8095:8080"

@@ -6,6 +6,8 @@
   "current_scope": [
     "one direct http(s) media url per job",
     "first 30 seconds only",
+    "automatic black-border cropping",
+    "lanczos upscaling with contrast-adaptive sharpening",
     "blurred pillarbox composition without distortion",
     "job states and error messages",
     "html5 player and mp4 download",
@@ -25,8 +27,8 @@
   "stories": [
     {
       "id": "S-01",
-      "requirements": ["R-01", "R-03", "R-04", "R-06", "R-07"],
-      "acceptance": ["A-01", "A-03", "A-04", "A-06", "A-07"],
+      "requirements": ["R-01", "R-03", "R-04", "R-06", "R-07", "R-11"],
+      "acceptance": ["A-01", "A-03", "A-04", "A-06", "A-07", "A-11"],
       "source_file": "STORIES.md"
     },
     {
@@ -114,6 +116,12 @@
       "owner": "C-04",
       "acceptance": ["A-10"],
       "source_file": "REQUIREMENTS.md"
+    },
+    {
+      "id": "R-11",
+      "owner": "C-04",
+      "acceptance": ["A-11"],
+      "source_file": "REQUIREMENTS.md"
     }
   ],
   "acceptance": [
@@ -126,7 +134,8 @@
     {"id": "A-07", "requirement": "R-07", "oracle_id": "O-01", "source_file": "ACCEPTANCE.md"},
     {"id": "A-08", "requirement": "R-08", "oracle_id": "O-01", "source_file": "ACCEPTANCE.md"},
     {"id": "A-09", "requirement": "R-09", "oracle_id": "O-01", "source_file": "ACCEPTANCE.md"},
-    {"id": "A-10", "requirement": "R-10", "oracle_id": "O-01", "source_file": "ACCEPTANCE.md"}
+    {"id": "A-10", "requirement": "R-10", "oracle_id": "O-01", "source_file": "ACCEPTANCE.md"},
+    {"id": "A-11", "requirement": "R-11", "oracle_id": "O-01", "source_file": "ACCEPTANCE.md"}
   ],
   "components": [
     {"id": "C-01", "depends_on": ["C-02"], "source_file": "ARCHITECTURE.md"},
@@ -138,7 +147,7 @@
     {
       "id": "O-01",
       "path": "tests/acceptance.py",
-      "acceptance_ids": ["A-01", "A-02", "A-03", "A-04", "A-05", "A-06", "A-07", "A-08", "A-09", "A-10"]
+      "acceptance_ids": ["A-01", "A-02", "A-03", "A-04", "A-05", "A-06", "A-07", "A-08", "A-09", "A-10", "A-11"]
     }
   ],
   "open_decisions": [],

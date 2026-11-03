@@ -255,7 +255,13 @@ def make_fixtures(directory):
          "-f", "lavfi", "-i", "testsrc2=size=1280x720:rate=25:duration=5",
          "-vf", "setsar=1", "-c:v", "libx264", "-preset", "ultrafast", "-crf", "28",
          "-pix_fmt", "yuv420p", wide], timeout=120)
-    return clip, silent, wide
+    bordered = os.path.join(directory, "bordered43.mp4")
+    run([FFMPEG, "-y", "-v", "error",
+         "-f", "lavfi", "-i", "testsrc2=size=704x576:rate=25:duration=10",
+         "-vf", "pad=720:576:8:0:black,setsar=16/15",
+         "-c:v", "libx264", "-preset", "ultrafast", "-crf", "28",
+         "-pix_fmt", "yuv420p", bordered], timeout=120)
+    return clip, silent, wide, bordered
 
 
 def probe(path):
@@ -311,8 +317,9 @@ def band_luma(rows, start, end):
     return total / float(count)
 
 
-def check_composition(path):
-    rows = luma_rows(frame_rgb(path, 10))
+def check_composition(path, at=10, left_expected=240, right_expected=1680,
+                      width_range=(1420, 1460), border_probe=None):
+    rows = luma_rows(frame_rgb(path, at))
     profile = column_profile(rows)
     center_peak = max(profile[700:1250])
     if center_peak < 2.0:
@@ -322,21 +329,29 @@ def check_composition(path):
     if left_peak > 0.25 * center_peak or right_peak > 0.25 * center_peak:
         fail("side bands are not smoother than the centre "
              "(left %.2f right %.2f centre %.2f)" % (left_peak, right_peak, center_peak))
-    left_window = profile[180:300]
-    right_window = profile[1620:1740]
-    left_seam = 180 + left_window.index(max(left_window))
-    right_seam = 1620 + right_window.index(max(right_window))
-    if abs(left_seam - 240) > 16:
-        fail("left seam at %d, expected 240 +/- 16" % left_seam)
-    if abs(right_seam - 1680) > 16:
-        fail("right seam at %d, expected 1680 +/- 16" % right_seam)
+    left_window = profile[max(0, left_expected - 60):left_expected + 60]
+    right_window = profile[right_expected - 60:right_expected + 60]
+    left_seam = max(0, left_expected - 60) + left_window.index(max(left_window))
+    right_seam = right_expected - 60 + right_window.index(max(right_window))
+    if abs(left_seam - left_expected) > 16:
+        fail("left seam at %d, expected %d +/- 16" % (left_seam, left_expected))
+    if abs(right_seam - right_expected) > 16:
+        fail("right seam at %d, expected %d +/- 16" % (right_seam, right_expected))
     width = right_seam - left_seam
-    if not 1420 <= width <= 1460:
-        fail("sharp band width %d, expected about 1440" % width)
+    if not width_range[0] <= width <= width_range[1]:
+        fail("sharp band width %d, expected %d..%d"
+             % (width, width_range[0], width_range[1]))
     for name, start, end in (("left", 0, 200), ("right", 1720, 1919)):
         mean = band_luma(rows, start, end)
         if mean <= 8:
             fail("%s band is black (mean luma %.1f)" % (name, mean))
+    if border_probe is not None:
+        for name, edge in (("left", left_seam + border_probe),
+                           ("right", right_seam - border_probe)):
+            mean = band_luma(rows, edge - 4, edge + 4)
+            if mean <= 8:
+                fail("a black border survived %d px inside the %s seam (mean luma %.1f)"
+                     % (border_probe, name, mean))
     return left_seam, right_seam, width
 
 
@@ -359,7 +374,7 @@ def main():
     try:
         fixture_dir = os.path.join(work, "fixtures")
         os.makedirs(fixture_dir)
-        clip, silent, wide = make_fixtures(fixture_dir)
+        clip, silent, wide, bordered = make_fixtures(fixture_dir)
         fixture_server, fixture_port = start_fixture_server(fixture_dir)
         media = "http://127.0.0.1:%d/clip43.mp4" % fixture_port
 
@@ -445,6 +460,23 @@ def main():
         # A-04 composition
         left, right, width = check_composition(result_path)
         ok("A-04", "seams %d/%d width %d" % (left, right, width))
+
+        # A-11 black-border crop
+        bordered_job = submit(base, "http://127.0.0.1:%d/bordered43.mp4" % fixture_port)
+        bordered_payload, _ = wait_final(base, bordered_job)
+        if bordered_payload["state"] != "done":
+            fail("bordered source ended in %s: %s"
+                 % (bordered_payload["state"], bordered_payload.get("message")))
+        bordered_path = os.path.join(work, "bordered-out.mp4")
+        status, _, blob = request(base + "/jobs/%s/result.mp4" % bordered_job)
+        if status != 200:
+            fail("bordered result answered %s" % status)
+        with open(bordered_path, "wb") as handle:
+            handle.write(blob)
+        left, right, width = check_composition(bordered_path, at=4,
+                                               left_expected=256, right_expected=1664,
+                                               width_range=(1392, 1424), border_probe=10)
+        ok("A-11", "seams %d/%d width %d" % (left, right, width))
 
         # A-07 duration and audio
         duration = float(meta.get("format", {}).get("duration", "0"))

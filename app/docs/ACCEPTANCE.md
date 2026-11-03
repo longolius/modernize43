@@ -36,3 +36,7 @@ The composition check is statistical by design; it does not read the filter grap
 - A-10: Given a service started without the opt-in flag, when the user posts a URL pointing at
   `127.0.0.1`, then the response is `400` with `private` in the body and no job exists. Given a
   service started with `--allow-private-hosts`, the same URL is accepted and reaches `done`.
+- A-11: Given a 720×576 source with an 8-pixel black bar on the left and on the right (content
+  704×576, SAR 16:15), when its job finishes, then the sharp band is 1408 ± 16 pixels wide and
+  centred at 960 ± 40, the side bands are non-black and smoother than the centre, and no column
+  within 8 pixels inside either seam is near-black (mean luma above 8).

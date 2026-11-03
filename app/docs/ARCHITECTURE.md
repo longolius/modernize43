@@ -18,12 +18,14 @@ flowchart LR
   creates a per-job temporary directory, moves a job through `queued` → `running` →
   `done`/`error`, enforces the 180-second budget, and deletes results after the retention time.
 - **C-03 Transcoder** — builds and runs the `ffmpeg` command: deinterlace when the source is
-  interlaced, cover-scale and blur the background, scale the foreground to height 1080, overlay it
-  centred, tag BT.709, encode H.264 CRF 20 with `yuv420p` and faststart, cap at 30 seconds, and
-  encode audio as AAC 192 kbit/s stereo. It is the only component that knows the filter graph.
+  interlaced, apply the detected border crop, cover-scale and blur the background, scale the
+  foreground to height 1080 with Lanczos and mild contrast-adaptive sharpening, overlay it centred,
+  tag BT.709, encode H.264 CRF 20 with `yuv420p` and faststart, cap at 30 seconds, and encode audio
+  as AAC 192 kbit/s stereo. It is the only component that knows the filter graph.
 - **C-04 Source inspector** — validates and normalizes the submitted URL (scheme, host, no private
-  targets by default), probes with `ffprobe`, derives display aspect ratio, field order, audio
-  presence and duration, and turns tool errors into readable messages.
+  targets by default), probes with `ffprobe`, detects black borders with `cropdetect` on a short
+  sample, derives the cropped display aspect ratio, field order, audio presence and duration, and
+  turns tool errors into readable messages.
 
 Dependencies: C-01 → C-02; C-02 → C-03 and C-04; C-03 → C-04. There is no cycle.
 

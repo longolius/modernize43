@@ -22,3 +22,7 @@
   scope and must be arranged outside this project.
 - D-11: The service is single-user with no authentication. It must not be exposed publicly in this
   revision.
+- D-12: Black borders are detected with `cropdetect` on at most the first five seconds and cropped
+  before any scaling, capped at 20% per side. Upscaling uses Lanczos plus contrast-adaptive
+  sharpening at strength 0.35 on the foreground only; denoising and grain management are not
+  enabled by default because they remove texture the archive may want to keep.

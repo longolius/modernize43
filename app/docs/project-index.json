@@ -1,0 +1,153 @@
+{
+  "schema_version": "dce.authoring-index/v1",
+  "project_id": "modernize43",
+  "status": "draft",
+  "goal": "A single user submits a direct URL to a 4:3 SD film and receives a 1920x1080 H.264 MP4 of its first 30 seconds with a blurred background filling the side bands, a sharp undistorted foreground, an in-page player and a download link.",
+  "current_scope": [
+    "one direct http(s) media url per job",
+    "first 30 seconds only",
+    "blurred pillarbox composition without distortion",
+    "job states and error messages",
+    "html5 player and mp4 download",
+    "private-address rejection by default"
+  ],
+  "out_of_scope": [
+    "batch processing",
+    "transcoding beyond 30 seconds",
+    "page scraping and platform integrations",
+    "subtitle and chapter preservation",
+    "ai upscaling and regrading",
+    "accounts and authentication",
+    "persistence across restarts",
+    "container images and remote deployment",
+    "mobile-specific layout"
+  ],
+  "stories": [
+    {
+      "id": "S-01",
+      "requirements": ["R-01", "R-03", "R-04", "R-06", "R-07"],
+      "acceptance": ["A-01", "A-03", "A-04", "A-06", "A-07"],
+      "source_file": "STORIES.md"
+    },
+    {
+      "id": "S-02",
+      "requirements": ["R-02", "R-08"],
+      "acceptance": ["A-02", "A-08"],
+      "source_file": "STORIES.md"
+    },
+    {
+      "id": "S-03",
+      "requirements": ["R-05", "R-09"],
+      "acceptance": ["A-05", "A-09"],
+      "source_file": "STORIES.md"
+    },
+    {
+      "id": "S-04",
+      "requirements": ["R-07"],
+      "acceptance": ["A-07"],
+      "source_file": "STORIES.md"
+    },
+    {
+      "id": "S-05",
+      "requirements": ["R-10"],
+      "acceptance": ["A-10"],
+      "source_file": "STORIES.md"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "R-01",
+      "owner": "C-01",
+      "acceptance": ["A-01"],
+      "source_file": "REQUIREMENTS.md"
+    },
+    {
+      "id": "R-02",
+      "owner": "C-04",
+      "acceptance": ["A-02"],
+      "source_file": "REQUIREMENTS.md"
+    },
+    {
+      "id": "R-03",
+      "owner": "C-03",
+      "acceptance": ["A-03"],
+      "source_file": "REQUIREMENTS.md"
+    },
+    {
+      "id": "R-04",
+      "owner": "C-03",
+      "acceptance": ["A-04"],
+      "source_file": "REQUIREMENTS.md"
+    },
+    {
+      "id": "R-05",
+      "owner": "C-02",
+      "acceptance": ["A-05"],
+      "source_file": "REQUIREMENTS.md"
+    },
+    {
+      "id": "R-06",
+      "owner": "C-01",
+      "acceptance": ["A-06"],
+      "source_file": "REQUIREMENTS.md"
+    },
+    {
+      "id": "R-07",
+      "owner": "C-03",
+      "acceptance": ["A-07"],
+      "source_file": "REQUIREMENTS.md"
+    },
+    {
+      "id": "R-08",
+      "owner": "C-04",
+      "acceptance": ["A-08"],
+      "source_file": "REQUIREMENTS.md"
+    },
+    {
+      "id": "R-09",
+      "owner": "C-02",
+      "acceptance": ["A-09"],
+      "source_file": "REQUIREMENTS.md"
+    },
+    {
+      "id": "R-10",
+      "owner": "C-04",
+      "acceptance": ["A-10"],
+      "source_file": "REQUIREMENTS.md"
+    }
+  ],
+  "acceptance": [
+    {"id": "A-01", "requirement": "R-01", "oracle_id": "O-01", "source_file": "ACCEPTANCE.md"},
+    {"id": "A-02", "requirement": "R-02", "oracle_id": "O-01", "source_file": "ACCEPTANCE.md"},
+    {"id": "A-03", "requirement": "R-03", "oracle_id": "O-01", "source_file": "ACCEPTANCE.md"},
+    {"id": "A-04", "requirement": "R-04", "oracle_id": "O-01", "source_file": "ACCEPTANCE.md"},
+    {"id": "A-05", "requirement": "R-05", "oracle_id": "O-01", "source_file": "ACCEPTANCE.md"},
+    {"id": "A-06", "requirement": "R-06", "oracle_id": "O-01", "source_file": "ACCEPTANCE.md"},
+    {"id": "A-07", "requirement": "R-07", "oracle_id": "O-01", "source_file": "ACCEPTANCE.md"},
+    {"id": "A-08", "requirement": "R-08", "oracle_id": "O-01", "source_file": "ACCEPTANCE.md"},
+    {"id": "A-09", "requirement": "R-09", "oracle_id": "O-01", "source_file": "ACCEPTANCE.md"},
+    {"id": "A-10", "requirement": "R-10", "oracle_id": "O-01", "source_file": "ACCEPTANCE.md"}
+  ],
+  "components": [
+    {"id": "C-01", "depends_on": ["C-02"], "source_file": "ARCHITECTURE.md"},
+    {"id": "C-02", "depends_on": ["C-03", "C-04"], "source_file": "ARCHITECTURE.md"},
+    {"id": "C-03", "depends_on": ["C-04"], "source_file": "ARCHITECTURE.md"},
+    {"id": "C-04", "depends_on": [], "source_file": "ARCHITECTURE.md"}
+  ],
+  "oracles": [
+    {
+      "id": "O-01",
+      "path": "tests/acceptance.py",
+      "acceptance_ids": ["A-01", "A-02", "A-03", "A-04", "A-05", "A-06", "A-07", "A-08", "A-09", "A-10"]
+    }
+  ],
+  "open_decisions": [],
+  "docs_files": [
+    "PROJECT.md",
+    "STORIES.md",
+    "REQUIREMENTS.md",
+    "ACCEPTANCE.md",
+    "ARCHITECTURE.md",
+    "DECISIONS.md"
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "schema_version": "dce.review/v1",
+  "review_id": "R-01",
+  "reviewer": "Independent subagent review",
+  "reviewer_session": "isolated subagent",
+  "project_path": "app",
+  "source_commit": "1abeb34ffce67066dd370ebc091a2ff29042212b",
+  "approval_commit": "82246b9947e7028a0df5b1418cc41d2238cbac77",
+  "code_commit": "9ca5b6d",
+  "bundle_sha256": "16ca2a75bd35a724105507a51408d25698b47bed83017f66dab9c063d4f03aa7",
+  "generated_sha256": "6565d9d4e5f470daad19eaec066888af693394055c4725bde2673fe348ee6925",
+  "created_at": "2026-11-03T15:05:00Z",
+  "verdict": "FAIL",
+  "findings": [
+    {
+      "id": "F-01",
+      "severity": "medium",
+      "title": "Background cover scaling ignores sample aspect ratio and distorts PAL/anamorphic sources",
+      "evidence": "app/modernize43/transcode.py:19-23"
+    }
+  ],
+  "notes": "Oracle O-01 passes in a temp copy (A-01..A-10). Verified 303/404/409/416/206 semantics, SSRF rejection for loopback/private/link-local/unspecified plus the allow flag, 30.0s duration, one AAC stereo stream at ~192 kbit/s (48 kHz), BT.709 tags and faststart. Deployment publishes 100.64.0.18:8095 (tailnet only), not 0.0.0.0."
+}

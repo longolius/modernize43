@@ -4,5 +4,21 @@ services:
     image: modernize43:0.1.0
     container_name: modernize43
     restart: unless-stopped
+    networks:
+      - proxy
     ports:
       - "100.64.0.18:8095:8080"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.modernize43.rule=Host(`studio71.svonm.de`)"
+      - "traefik.http.routers.modernize43.entrypoints=https"
+      - "traefik.http.routers.modernize43.tls=true"
+      - "traefik.http.routers.modernize43.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.modernize43.middlewares=modernize43-auth@docker,security-headers@file"
+      - "traefik.http.services.modernize43.loadbalancer.server.port=8080"
+      - "traefik.http.middlewares.modernize43-auth.basicauth.users=svm:$$2y$$05$$MK7sTujo2TLsdQ7iviAbvegJOsO9q9luSsaVy4JyQGhCMbojH2J0a,studio71:$$2y$$05$$2pdQH/NnlwloX0.TWvKdL.g25e2/PMwgjri0br0oaIs1HcZdx6IGq"
+
+networks:
+  proxy:
+    external: true

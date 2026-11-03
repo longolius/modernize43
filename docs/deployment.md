@@ -14,6 +14,7 @@ die gepinnte Spec liegt unter `app/docs/` und bleibt unverändert.
 | Image | `modernize43:0.1.0` |
 | Container | `modernize43`, `restart: unless-stopped` |
 | Portbindung | `100.64.0.18:8095 -> 8080/tcp` |
+| Öffentlich | `https://studio71.svonm.de` (Traefik, Basic Auth) |
 
 Erreichbar ausschließlich über das SvM-Tailnet:
 
@@ -75,3 +76,37 @@ dieses Flag und blockiert private Ziele.
   Wer das braucht, muss bewusst `--allow-private-hosts` setzen — dann ist die
   SSRF-Grenze weg und die App darf nur noch im Tailnet stehen.
 - Keine Persistenz, kein Auth, keine horizontalen Skalierung.
+
+## Öffentliche Auslieferung: studio71.svonm.de
+
+Stand 2026-11-03. DNS liegt bei Route 53 und zeigt auf `49.13.203.142`. TLS und
+Routing macht der vorhandene Traefik auf `svm-ai` (Docker-Provider,
+`exposedByDefault: false`, Netzwerk `proxy`, Entrypoint `https` mit
+Cert-Resolver `letsencrypt`).
+
+Der Container hängt im externen Netz `proxy` und trägt diese Labels:
+
+- `traefik.http.routers.modernize43.rule=Host(`studio71.svonm.de`)`
+- `entrypoints=https`, `tls.certresolver=letsencrypt`
+- Middlewares: `modernize43-auth@docker` (Basic Auth) und `security-headers@file`
+- `loadbalancer.server.port=8080`
+
+Basic Auth (htpasswd, bcrypt) mit zwei Demo-Zugängen:
+
+| User | Passwort |
+| --- | --- |
+| `svm` | `demo` |
+| `studio71` | `demo` |
+
+Das sind Demo-Zugangsdaten. Vor echtem Einsatz ersetzen — die Hashes stehen in
+`app/compose.yaml`, Klartextpasswörter gehören nicht ins Repo.
+
+Verifikation:
+
+```sh
+curl -sS -o /dev/null -w '%{http_code}\n' https://studio71.svonm.de/            # 401
+curl -sS -u svm:demo -o /dev/null -w '%{http_code}\n' https://studio71.svonm.de/ # 200
+curl -sS -u studio71:demo -o /dev/null -w '%{http_code}\n' https://studio71.svonm.de/ # 200
+```
+
+Die Tailnet-Bindung `100.64.0.18:8095` bleibt als direkter Zugang erhalten.

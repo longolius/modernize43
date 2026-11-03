@@ -90,12 +90,14 @@ def wait_health(base, proc, timeout=30):
     fail("application did not become healthy")
 
 
-def start_app(port, allow_private):
+def start_app(port, allow_private, env_extra=None):
     argv = [sys.executable, "-m", "modernize43", "--port", str(port)]
     if allow_private:
         argv.append("--allow-private-hosts")
+    env = os.environ.copy()
+    env.update(env_extra or {})
     log = tempfile.TemporaryFile()
-    proc = subprocess.Popen(argv, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT)
+    proc = subprocess.Popen(argv, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, env=env)
     base = "http://127.0.0.1:%d" % port
     try:
         wait_health(base, proc)
@@ -257,13 +259,25 @@ def make_fixtures(directory):
          "-f", "lavfi", "-i", "testsrc2=size=1280x720:rate=25:duration=5",
          "-vf", "setsar=1", "-c:v", "libx264", "-preset", "ultrafast", "-crf", "28",
          "-pix_fmt", "yuv420p", wide], timeout=120)
+    intro = os.path.join(directory, "intro3.mp4")
+    run([FFMPEG, "-y", "-v", "error",
+         "-f", "lavfi", "-i", "color=c=blue:s=1920x1080:d=3:r=25",
+         "-f", "lavfi", "-i", "sine=frequency=880:duration=3",
+         "-c:v", "libx264", "-preset", "ultrafast", "-crf", "23",
+         "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "96k", "-shortest", intro], timeout=120)
+    arabella = os.path.join(directory, "arabella.mp4")
+    run([FFMPEG, "-y", "-v", "error",
+         "-f", "lavfi", "-i", "testsrc2=size=640x480:rate=25:duration=10",
+         "-f", "lavfi", "-i", "sine=frequency=550:duration=10",
+         "-vf", "setsar=1", "-c:v", "libx264", "-preset", "ultrafast", "-crf", "28",
+         "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "96k", "-shortest", arabella], timeout=120)
     bordered = os.path.join(directory, "bordered43.mp4")
     run([FFMPEG, "-y", "-v", "error",
          "-f", "lavfi", "-i", "testsrc2=size=704x576:rate=25:duration=10",
          "-vf", "pad=720:576:8:0:black,setsar=16/15",
          "-c:v", "libx264", "-preset", "ultrafast", "-crf", "28",
          "-pix_fmt", "yuv420p", bordered], timeout=120)
-    return clip, silent, wide, bordered
+    return clip, silent, wide, bordered, intro, arabella
 
 
 def probe(path):
@@ -274,6 +288,17 @@ def probe(path):
 
 def stream(meta, kind):
     return [s for s in meta.get("streams", []) if s.get("codec_type") == kind]
+
+
+def mean_rgb(frame):
+    total = [0, 0, 0]
+    count = 0
+    for i in range(0, len(frame), 3 * 97):
+        total[0] += frame[i]
+        total[1] += frame[i + 1]
+        total[2] += frame[i + 2]
+        count += 1
+    return tuple(value / float(count) for value in total)
 
 
 def frame_rgb(path, seconds):
@@ -390,11 +415,14 @@ def main():
     try:
         fixture_dir = os.path.join(work, "fixtures")
         os.makedirs(fixture_dir)
-        clip, silent, wide, bordered = make_fixtures(fixture_dir)
+        clip, silent, wide, bordered, intro, arabella = make_fixtures(fixture_dir)
         fixture_server, fixture_port = start_fixture_server(fixture_dir)
         media = "http://127.0.0.1:%d/clip43.mp4" % fixture_port
 
-        main_proc, base, _ = start_app(free_port(), True)
+        main_proc, base, _ = start_app(free_port(), True, {
+            "MODERNIZE43_INTRO_URL": "http://127.0.0.1:%d/intro3.mp4" % fixture_port,
+            "MODERNIZE43_ARABELLA_URL": "http://127.0.0.1:%d/arabella.mp4" % fixture_port,
+        })
 
         # A-01 form and job creation
         status, _, body = request(base + "/")
@@ -405,6 +433,10 @@ def main():
             fail("GET / has no url input form")
         if 'name="logo"' not in html or 'value="joyn"' not in html:
             fail("GET / has no logo select with a joyn option")
+        if 'name="intro"' not in html or 'name="source"' not in html:
+            fail("GET / has no intro or source select")
+        if 'name="seconds"' not in html or 'value="30"' not in html:
+            fail("GET / has no seconds input with default 30")
         job_id = submit(base, media)
         status, _, _ = request(base + "/jobs/%s" % job_id)
         if status != 200:
@@ -516,6 +548,69 @@ def main():
             fail("logo overlay not visible (logo diff %.2f, control diff %.2f)"
                  % (logo_diff, control_diff))
         ok("A-12", "logo diff %.1f control %.1f" % (logo_diff, control_diff))
+
+        # A-13 intro prepended
+        intro_job = submit(base, media, {"intro": "joyn", "seconds": "5"})
+        intro_payload, _ = wait_final(base, intro_job)
+        if intro_payload["state"] != "done":
+            fail("intro job ended in %s: %s"
+                 % (intro_payload["state"], intro_payload.get("message")))
+        intro_path = os.path.join(work, "intro-out.mp4")
+        status, _, blob = request(base + "/jobs/%s/result.mp4" % intro_job)
+        if status != 200:
+            fail("intro result answered %s" % status)
+        with open(intro_path, "wb") as handle:
+            handle.write(blob)
+        intro_meta = probe(intro_path)
+        intro_duration = float(intro_meta.get("format", {}).get("duration", "0"))
+        if abs(intro_duration - 8.0) > 0.7:
+            fail("intro result duration is %.2fs, expected 8 +/- 0.7" % intro_duration)
+        first = frame_rgb(intro_path, 1)
+        red, green, blue = mean_rgb(first)
+        if not (blue > 60 and blue > 1.5 * red):
+            fail("first frame is not the blue intro (r %.0f g %.0f b %.0f)" % (red, green, blue))
+        later = mean_rgb(frame_rgb(intro_path, 5))
+        if later[2] > 60 and later[2] > 1.5 * later[0]:
+            fail("content after the intro is still the blue intro frame")
+        ok("A-13", "%.2fs" % intro_duration)
+
+        # A-14 seconds honoured
+        short_job = submit(base, media, {"seconds": "4"})
+        short_payload, _ = wait_final(base, short_job)
+        if short_payload["state"] != "done":
+            fail("short job ended in %s: %s"
+                 % (short_payload["state"], short_payload.get("message")))
+        short_path = os.path.join(work, "short-out.mp4")
+        status, _, blob = request(base + "/jobs/%s/result.mp4" % short_job)
+        if status != 200:
+            fail("short result answered %s" % status)
+        with open(short_path, "wb") as handle:
+            handle.write(blob)
+        short_duration = float(probe(short_path).get("format", {}).get("duration", "0"))
+        if abs(short_duration - 4.0) > 0.5:
+            fail("short result duration is %.2fs, expected 4 +/- 0.5" % short_duration)
+        ok("A-14", "%.2fs" % short_duration)
+
+        # A-15 arabella preset
+        preset_job = submit(base, "", {"source": "arabella", "seconds": "4"})
+        preset_payload, _ = wait_final(base, preset_job)
+        if preset_payload["state"] != "done":
+            fail("preset job ended in %s: %s"
+                 % (preset_payload["state"], preset_payload.get("message")))
+        preset_path = os.path.join(work, "preset-out.mp4")
+        status, _, blob = request(base + "/jobs/%s/result.mp4" % preset_job)
+        if status != 200:
+            fail("preset result answered %s" % status)
+        with open(preset_path, "wb") as handle:
+            handle.write(blob)
+        preset_meta = probe(preset_path)
+        preset_video = stream(preset_meta, "video")[0]
+        if preset_video.get("width") != 1920 or preset_video.get("height") != 1080:
+            fail("preset result is %sx%s" % (preset_video.get("width"), preset_video.get("height")))
+        preset_duration = float(preset_meta.get("format", {}).get("duration", "0"))
+        if abs(preset_duration - 4.0) > 0.5:
+            fail("preset result duration is %.2fs, expected 4 +/- 0.5" % preset_duration)
+        ok("A-15", "%.2fs" % preset_duration)
 
         # A-07 duration and audio
         duration = float(meta.get("format", {}).get("duration", "0"))

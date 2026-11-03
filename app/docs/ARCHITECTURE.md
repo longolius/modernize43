@@ -21,8 +21,9 @@ flowchart LR
   interlaced, apply the detected border crop, cover-scale and blur the background, scale the
   foreground to height 1080 with Lanczos and mild contrast-adaptive sharpening, overlay it centred,
   optionally overlay the bundled logo in the foreground's top-left corner, tag BT.709, encode H.264
-  CRF 20 with `yuv420p` and faststart, cap at 30 seconds, and encode audio as AAC 192 kbit/s
-  stereo. It is the only component that knows the filter graph.
+  CRF 20 with `yuv420p` and faststart, cap at the requested seconds, and encode audio as AAC
+  192 kbit/s stereo. When an intro is selected it encodes the intro to the same parameters and
+  joins both parts with the concat demuxer. It is the only component that knows the filter graph.
 - **C-04 Source inspector** — validates and normalizes the submitted URL (scheme, host, no private
   targets by default), probes with `ffprobe`, detects black borders with `cropdetect` on a short
   sample, derives the cropped display aspect ratio, field order, audio presence and duration, and

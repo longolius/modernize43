@@ -29,10 +29,14 @@
   `Content-Disposition: attachment; filename="modernize43-<id>.mp4"`. A single-range request
   (`Range: bytes=0-99`) answers `206` with exactly 100 bytes and a `Content-Range` header. Before the
   job is done the same path answers `409`.
-- R-07: The output duration is 30 seconds when the source is at least 30 seconds long, otherwise the
-  full source duration, with a tolerance of 0.5 seconds. If the source has an audio stream, the
-  output has exactly one AAC stereo audio stream at 192 kbit/s. If the source has no audio, the
-  output has no audio stream and is still valid.
+- R-07: The output content duration is the requested number of seconds (`seconds`, default 30) when
+  the source is at least that long, otherwise the full source duration, with a tolerance of
+  0.5 seconds. Without an intro the output duration equals the content duration; with an
+  intro the output duration is the intro duration plus the content duration. If the source
+  has an audio stream, the output has exactly one AAC stereo audio stream at 192 kbit/s. If
+  the source has no audio and no intro is selected, the output has no audio stream and is
+  still valid; with an intro, a silent audio track fills the content part.
+
 - R-08: A source is accepted only if its border-cropped display aspect ratio is narrower than 16:9
   by more than 1% relative tolerance (display aspect ratio below 16/9 divided by 1.01). Otherwise
   the job ends in state `error` with a message that contains `aspect ratio`. This accepts 4:3, 3:2,
@@ -54,3 +58,14 @@
   the foreground's left edge, with a width of 16% of the foreground width and never more than 20%
   of it. Any other value is rejected with HTTP `400` and no job is created. The logo is never
   fetched from the network at request time.
+- R-13: `POST /jobs` accepts an optional `intro` field. `none`, which is also the default,
+  adds nothing. `joyn` fetches the configured Joyn intro (a 16:9 asset), normalises it to
+  1920×1080, square pixels, BT.709, the content's frame rate and AAC 48 kHz stereo, and prepends it
+  in full before the content. The intro is never cropped to the 4:3 layout and never blurred.
+- R-14: `POST /jobs` accepts a `seconds` field with an integer from 1 to 600. Missing or empty means
+  30. Values outside the range or non-numeric values are rejected with HTTP `400` and no job. The
+  value applies to the content, not to the intro.
+- R-15: `POST /jobs` accepts a `source` field. `url`, the default, uses the submitted `url`.
+  `arabella` ignores the submitted URL and uses the configured Arabella SD 480p preset. Any other
+  value is rejected with HTTP `400` and no job. The preset URL and the intro URL can be overridden
+  with `MODERNIZE43_ARABELLA_URL` and `MODERNIZE43_INTRO_URL` for tests.

@@ -5,8 +5,8 @@ public HTTP interface only and inspects the produced file with `ffprobe` and raw
 The composition check is statistical by design; it does not read the filter graph.
 
 - A-01: Given a running service and a reachable 4:3 MP4 fixture, when the user opens `GET /` and
-  posts its URL to `/jobs`, then the form contains an input named `url` and a select named `logo`
-  with a `joyn` option, the response is `303` with a `Location` of `/jobs/<id>`, and
+  posts its URL to `/jobs`, then the form contains an input named `url`, selects named `logo`, `intro` and `source`
+  with a `joyn`/`arabella` option, and a number input named `seconds` with value 30, the response is `303` with a `Location` of `/jobs/<id>`, and
   `GET /jobs/<id>` answers `200`.
 - A-02: Given the same service, when the user posts `file:///etc/passwd`, an empty value and a
   relative path, then each request answers `400`, the body names the problem, and no job page is
@@ -45,3 +45,12 @@ The composition check is statistical by design; it does not read the filter grap
   `logo=joyn`, then both finish and, in a frame taken at 10 seconds, the mean absolute luma
   difference in the top-left foreground area (x 260–500, y 40–150) is at least 2 and at least four
   times the difference measured in a control area lower in the frame (x 260–500, y 700–810).
+- A-13: Given a 3-second 16:9 intro fixture and a 4:3 content fixture, when a job is submitted with
+  `intro=joyn` and `seconds=5`, then the result duration is 8.0 ± 0.7 seconds, a frame at 1 second
+  has a blue-dominant mean (blue above 60 and above 1.5× red), and a frame at 5 seconds is not
+  blue-dominant.
+- A-14: Given the same content, when a job is submitted with `seconds=4` and no intro, then the
+  result duration is 4.0 ± 0.5 seconds.
+- A-15: Given the content preset is overridden to a local 640×480 fixture, when a job is submitted
+  with `source=arabella`, an empty `url` and `seconds=4`, then the job reaches `done`, the result is
+  1920×1080 and the duration is 4.0 ± 0.5 seconds.

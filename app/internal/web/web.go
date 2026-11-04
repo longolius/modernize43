@@ -81,7 +81,7 @@ func renderForm(data formData) string {
 <button type="submit">Modernisieren</button>
 </form>%s`,
 		html.EscapeString(data.URL),
-		selectBlock("source", [][2]string{{"url", "Eigene URL"}, {"arabella", "Arabella SD 480p"}}, data.Source),
+		selectBlock("source", [][2]string{{"url", "Eigene URL"}, {"arabella", "Arabella SD 480p"}, {"arabella_hq", "Arabella HQ (768×576)"}}, data.Source),
 		selectBlock("logo", [][2]string{{"none", "Kein Logo"}, {"joyn", "Joyn oben links"}}, data.Logo),
 		selectBlock("intro", [][2]string{{"none", "Ohne Vorspann"}, {"joyn", "Joyn-Vorspann"}}, data.Intro),
 		data.Seconds, message))
@@ -114,7 +114,7 @@ func (h *Handler) create(w http.ResponseWriter, r *http.Request) {
 		problem = "Unbekannte Logo-Option."
 	case data.Intro != "none" && data.Intro != "joyn":
 		problem = "Unbekannte Vorspann-Option."
-	case data.Source != "url" && data.Source != "arabella":
+	case data.Source != "url" && data.Source != "arabella" && data.Source != "arabella_hq":
 		problem = "Unbekannte Quelle."
 	case data.Seconds < 1 || data.Seconds > 600:
 		problem = "Die Dauer muss zwischen 1 und 600 Sekunden liegen."
@@ -128,8 +128,11 @@ func (h *Handler) create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	candidate := data.URL
-	if data.Source == "arabella" {
+	switch data.Source {
+	case "arabella":
 		candidate = source.PresetArabella()
+	case "arabella_hq":
+		candidate = source.PresetArabellaHQ()
 	}
 	validated, err := source.ValidateURL(candidate, h.manager.AllowPrivate())
 	if err != nil {

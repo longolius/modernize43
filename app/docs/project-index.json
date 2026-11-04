@@ -15,7 +15,7 @@
     "private-address rejection by default",
     "optional 16:9 joyn intro prepended in full",
     "configurable content duration, default 30 seconds",
-    "arabella 480p source preset"
+    "arabella source presets (480p, 768x576)"
   ],
   "out_of_scope": [
     "batch processing",
@@ -53,7 +53,8 @@
         "A-12",
         "A-13",
         "A-14",
-        "A-15"
+        "A-15",
+        "A-16"
       ],
       "source_file": "STORIES.md"
     },
@@ -219,7 +220,8 @@
       "id": "R-15",
       "owner": "C-01",
       "acceptance": [
-        "A-15"
+        "A-15",
+        "A-16"
       ],
       "source_file": "REQUIREMENTS.md"
     }
@@ -314,6 +316,12 @@
       "requirement": "R-15",
       "oracle_id": "O-01",
       "source_file": "ACCEPTANCE.md"
+    },
+    {
+      "id": "A-16",
+      "requirement": "R-15",
+      "oracle_id": "O-01",
+      "source_file": "ACCEPTANCE.md"
     }
   ],
   "components": [
@@ -368,7 +376,8 @@
         "A-12",
         "A-13",
         "A-14",
-        "A-15"
+        "A-15",
+        "A-16"
       ]
     }
   ],

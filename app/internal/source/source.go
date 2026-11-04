@@ -46,6 +46,14 @@ func PresetIntro() string {
 	return "https://hal.longolius.cc/joynintro.m4v"
 }
 
+// PresetArabellaHQ returns the configured high-quality Arabella preset URL.
+func PresetArabellaHQ() string {
+	if value := os.Getenv("MODERNIZE43_ARABELLA_HQ_URL"); value != "" {
+		return value
+	}
+	return "https://hal.longolius.cc/arabella.m4v"
+}
+
 // PresetArabella returns the configured Arabella preset URL.
 func PresetArabella() string {
 	if value := os.Getenv("MODERNIZE43_ARABELLA_URL"); value != "" {

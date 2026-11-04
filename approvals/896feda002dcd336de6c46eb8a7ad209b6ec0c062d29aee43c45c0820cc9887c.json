@@ -1,0 +1,12 @@
+{
+  "schema_version": "dce.docs-approval/v1",
+  "binding": {
+    "schema_version": "dce.docs-approval-binding/v1",
+    "source_commit": "ce8f74445cbc3293f58b76542d403e6b6816016d",
+    "project_path": "app",
+    "index_sha256": "a08dd9a04f6f946cb3af1d3b99babcd9aa1052acad51cea34061c5661aaa95a6",
+    "bundle_sha256": "896feda002dcd336de6c46eb8a7ad209b6ec0c062d29aee43c45c0820cc9887c"
+  },
+  "approved_by": "Nikolai Longolius",
+  "approved_at": "2026-11-04T10:10:59Z"
+}

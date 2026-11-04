@@ -37,6 +37,6 @@
   gets a silent audio track when an intro is present, otherwise the concat would fail.
 - D-15: `seconds` applies to the content only; the intro adds its own length. Default 30, range
   1–600. This keeps "30 seconds of film" true when an intro is selected.
-- D-16: The Arabella presets and the intro URL are fixed server-side and can be overridden with
-  `MODERNIZE43_ARABELLA_URL`, `MODERNIZE43_ARABELLA_HQ_URL` and `MODERNIZE43_INTRO_URL` for the
-  acceptance oracle. The UI never accepts arbitrary preset URLs.
+- D-16: The Arabella preset and the intro URL are fixed server-side and can be overridden with
+  `MODERNIZE43_ARABELLA_HQ_URL` and `MODERNIZE43_INTRO_URL` for the acceptance oracle. The UI never
+  accepts arbitrary preset URLs.

@@ -66,7 +66,6 @@
   30. Values outside the range or non-numeric values are rejected with HTTP `400` and no job. The
   value applies to the content, not to the intro.
 - R-15: `POST /jobs` accepts a `source` field. `url`, the default, uses the submitted `url`.
-  `arabella` ignores the submitted URL and uses the configured Arabella SD 480p preset (640×480).
-  `arabella_hq` ignores it too and uses the configured Arabella 768×576 preset. Any other value is
-  rejected with HTTP `400` and no job. The preset URLs and the intro URL can be overridden with
-  `MODERNIZE43_ARABELLA_URL`, `MODERNIZE43_ARABELLA_HQ_URL` and `MODERNIZE43_INTRO_URL` for tests.
+  `arabella_hq` ignores the submitted URL and uses the configured Arabella 768×576 preset. Any other
+  value is rejected with HTTP `400` and no job. The preset URL and the intro URL can be overridden
+  with `MODERNIZE43_ARABELLA_HQ_URL` and `MODERNIZE43_INTRO_URL` for tests.

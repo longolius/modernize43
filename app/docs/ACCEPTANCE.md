@@ -51,9 +51,6 @@ The composition check is statistical by design; it does not read the filter grap
   blue-dominant.
 - A-14: Given the same content, when a job is submitted with `seconds=4` and no intro, then the
   result duration is 4.0 ± 0.5 seconds.
-- A-15: Given the content preset is overridden to a local 640×480 fixture, when a job is submitted
-  with `source=arabella`, an empty `url` and `seconds=4`, then the job reaches `done`, the result is
-  1920×1080 and the duration is 4.0 ± 0.5 seconds.
 
 ## Regelbindung der Komponenten
 
@@ -75,6 +72,6 @@ werden nicht in die Spezifikation aufgenommen.
 | SRC-01 | A-02, A-10 |
 | SRC-02 | A-08 |
 | SRC-03 | A-11 |
-- A-16: Given the HQ preset is overridden to a local 768×576 fixture, when a job is submitted with
+- A-15: Given the content preset is overridden to a local 768×576 fixture, when a job is submitted with
   `source=arabella_hq`, an empty `url` and `seconds=4`, then the job reaches `done`, the result is
   1920×1080 and the duration is 4.0 ± 0.5 seconds.

@@ -75,3 +75,6 @@ werden nicht in die Spezifikation aufgenommen.
 | SRC-01 | A-02, A-10 |
 | SRC-02 | A-08 |
 | SRC-03 | A-11 |
+- A-16: Given the HQ preset is overridden to a local 768×576 fixture, when a job is submitted with
+  `source=arabella_hq`, an empty `url` and `seconds=4`, then the job reaches `done`, the result is
+  1920×1080 and the duration is 4.0 ± 0.5 seconds.

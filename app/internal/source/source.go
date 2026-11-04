@@ -54,14 +54,6 @@ func PresetArabellaHQ() string {
 	return "https://hal.longolius.cc/arabella.m4v"
 }
 
-// PresetArabella returns the configured Arabella preset URL.
-func PresetArabella() string {
-	if value := os.Getenv("MODERNIZE43_ARABELLA_URL"); value != "" {
-		return value
-	}
-	return "https://hal.longolius.cc/arabella%20-%20SD%20480p.mov"
-}
-
 func lastLine(text string) string {
 	lines := strings.Split(strings.TrimSpace(text), "\n")
 	for i := len(lines) - 1; i >= 0; i-- {

@@ -17,7 +17,7 @@ stretched or cropped.
 - A logo can be overlaid in the top-left corner of the 4:3 content, chosen from a dropdown.
 - An optional 16:9 Joyn intro is prepended in full before the film.
 - The transcoded length is configurable, default 30 seconds.
-- Optional source presets (Arabella SD 480p and Arabella 768×576) can replace the pasted URL.
+- An optional source preset (Arabella 768×576) can replace the pasted URL.
 - Output is 1920×1080 H.264 in MP4 with AAC audio, correct SAR, BT.709 tags and faststart.
 - SD footage is upscaled with Lanczos and mild contrast-adaptive sharpening.
 - The job page shows queued, running, done or failed.

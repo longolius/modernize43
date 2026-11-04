@@ -265,12 +265,6 @@ def make_fixtures(directory):
          "-f", "lavfi", "-i", "sine=frequency=880:duration=3",
          "-c:v", "libx264", "-preset", "ultrafast", "-crf", "23",
          "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "96k", "-shortest", intro], timeout=120)
-    arabella = os.path.join(directory, "arabella.mp4")
-    run([FFMPEG, "-y", "-v", "error",
-         "-f", "lavfi", "-i", "testsrc2=size=640x480:rate=25:duration=10",
-         "-f", "lavfi", "-i", "sine=frequency=550:duration=10",
-         "-vf", "setsar=1", "-c:v", "libx264", "-preset", "ultrafast", "-crf", "28",
-         "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "96k", "-shortest", arabella], timeout=120)
     arabella_hq = os.path.join(directory, "arabella_hq.mp4")
     run([FFMPEG, "-y", "-v", "error",
          "-f", "lavfi", "-i", "testsrc2=size=768x576:rate=25:duration=10",
@@ -283,7 +277,7 @@ def make_fixtures(directory):
          "-vf", "pad=720:576:8:0:black,setsar=16/15",
          "-c:v", "libx264", "-preset", "ultrafast", "-crf", "28",
          "-pix_fmt", "yuv420p", bordered], timeout=120)
-    return clip, silent, wide, bordered, intro, arabella, arabella_hq
+    return clip, silent, wide, bordered, intro, arabella_hq
 
 
 def probe(path):
@@ -421,13 +415,12 @@ def main():
     try:
         fixture_dir = os.path.join(work, "fixtures")
         os.makedirs(fixture_dir)
-        clip, silent, wide, bordered, intro, arabella, arabella_hq = make_fixtures(fixture_dir)
+        clip, silent, wide, bordered, intro, arabella_hq = make_fixtures(fixture_dir)
         fixture_server, fixture_port = start_fixture_server(fixture_dir)
         media = "http://127.0.0.1:%d/clip43.mp4" % fixture_port
 
         main_proc, base, _ = start_app(free_port(), True, {
             "MODERNIZE43_INTRO_URL": "http://127.0.0.1:%d/intro3.mp4" % fixture_port,
-            "MODERNIZE43_ARABELLA_URL": "http://127.0.0.1:%d/arabella.mp4" % fixture_port,
             "MODERNIZE43_ARABELLA_HQ_URL": "http://127.0.0.1:%d/arabella_hq.mp4" % fixture_port,
         })
 
@@ -598,28 +591,8 @@ def main():
             fail("short result duration is %.2fs, expected 4 +/- 0.5" % short_duration)
         ok("A-14", "%.2fs" % short_duration)
 
-        # A-15 arabella preset
-        preset_job = submit(base, "", {"source": "arabella", "seconds": "4"})
-        preset_payload, _ = wait_final(base, preset_job)
-        if preset_payload["state"] != "done":
-            fail("preset job ended in %s: %s"
-                 % (preset_payload["state"], preset_payload.get("message")))
-        preset_path = os.path.join(work, "preset-out.mp4")
-        status, _, blob = request(base + "/jobs/%s/result.mp4" % preset_job)
-        if status != 200:
-            fail("preset result answered %s" % status)
-        with open(preset_path, "wb") as handle:
-            handle.write(blob)
-        preset_meta = probe(preset_path)
-        preset_video = stream(preset_meta, "video")[0]
-        if preset_video.get("width") != 1920 or preset_video.get("height") != 1080:
-            fail("preset result is %sx%s" % (preset_video.get("width"), preset_video.get("height")))
-        preset_duration = float(preset_meta.get("format", {}).get("duration", "0"))
-        if abs(preset_duration - 4.0) > 0.5:
-            fail("preset result duration is %.2fs, expected 4 +/- 0.5" % preset_duration)
-        ok("A-15", "%.2fs" % preset_duration)
 
-        # A-16 arabella HQ preset
+        # A-15 arabella preset
         hq_job = submit(base, "", {"source": "arabella_hq", "seconds": "4"})
         hq_payload, _ = wait_final(base, hq_job)
         if hq_payload["state"] != "done":
@@ -638,7 +611,7 @@ def main():
         hq_duration = float(hq_meta.get("format", {}).get("duration", "0"))
         if abs(hq_duration - 4.0) > 0.5:
             fail("HQ preset result duration is %.2fs, expected 4 +/- 0.5" % hq_duration)
-        ok("A-16", "%.2fs" % hq_duration)
+        ok("A-15", "%.2fs" % hq_duration)
 
         # A-07 duration and audio
         duration = float(meta.get("format", {}).get("duration", "0"))

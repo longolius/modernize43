@@ -1,13 +1,15 @@
-FROM python:3.12-slim
+FROM golang:1.24-alpine AS build
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends ffmpeg \
-    && rm -rf /var/lib/apt/lists/*
+WORKDIR /src
+COPY go.mod ./
+COPY . .
+RUN CGO_ENABLED=0 go build -trimpath -ldflags "-s -w" -o /out/modernize43 .
+
+FROM alpine:3.20
+
+RUN apk add --no-cache ffmpeg
+COPY --from=build /out/modernize43 /usr/local/bin/modernize43
 
 WORKDIR /srv
-COPY modernize43 ./modernize43
-
-ENV PYTHONUNBUFFERED=1
 EXPOSE 8080
-
-CMD ["python3", "-m", "modernize43", "--host", "0.0.0.0", "--port", "8080"]
+ENTRYPOINT ["modernize43", "--host", "0.0.0.0", "--port", "8080"]

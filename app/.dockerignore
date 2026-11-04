@@ -1,4 +1,4 @@
-__pycache__/
-*.pyc
-docs/
+modernize43
 tests/
+docs/
+*.pyc

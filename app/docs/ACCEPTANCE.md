@@ -54,3 +54,24 @@ The composition check is statistical by design; it does not read the filter grap
 - A-15: Given the content preset is overridden to a local 640×480 fixture, when a job is submitted
   with `source=arabella`, an empty `url` and `seconds=4`, then the job reaches `done`, the result is
   1920×1080 and the duration is 4.0 ± 0.5 seconds.
+
+## Regelbindung der Komponenten
+
+Jede Komponentenregel ist an mindestens ein Abnahmekriterium gebunden. Regeln ohne Bindung
+werden nicht in die Spezifikation aufgenommen.
+
+| Regel | Kriterien |
+| --- | --- |
+| WEB-01 | A-01, A-02, A-08, A-14, A-15 |
+| WEB-02 | A-01, A-05, A-06, A-09 |
+| WEB-03 | A-06 |
+| JOB-01 | A-05 |
+| JOB-02 | A-05, A-08, A-09 |
+| JOB-03 | A-09 |
+| TRC-01 | A-03 |
+| TRC-02 | A-04, A-11 |
+| TRC-03 | A-07, A-13, A-14 |
+| TRC-04 | A-12 |
+| SRC-01 | A-02, A-10 |
+| SRC-02 | A-08 |
+| SRC-03 | A-11 |

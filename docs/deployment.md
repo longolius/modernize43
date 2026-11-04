@@ -1,6 +1,6 @@
 # Deployment: modernize43 on svm-ai
 
-Stand: 2026-11-03. Diese Datei ist Betriebsdokumentation, keine normative Spezifikation —
+Stand: 2026-11-04. Diese Datei ist Betriebsdokumentation, keine normative Spezifikation —
 die gepinnte Spec liegt unter `app/docs/` und bleibt unverändert.
 
 ## Wo
@@ -11,7 +11,7 @@ die gepinnte Spec liegt unter `app/docs/` und bleibt unverändert.
 | Tailnet | SvM / `headscale.svonm.de`, Node-IP `100.64.0.18` |
 | DNS im Tailnet | `svm-ai.svonm.internal` |
 | Verzeichnis | `/opt/containers/modernize43` |
-| Image | `modernize43:0.1.0` |
+| Image | `modernize43:0.1.0` (Go-Binary, Alpine + ffmpeg) |
 | Container | `modernize43`, `restart: unless-stopped` |
 | Portbindung | `100.64.0.18:8095 -> 8080/tcp` |
 | Öffentlich | `https://studio71.svonm.de` (Traefik, Basic Auth) |
@@ -110,3 +110,27 @@ curl -sS -u studio71:demo -o /dev/null -w '%{http_code}\n' https://studio71.svon
 ```
 
 Die Tailnet-Bindung `100.64.0.18:8095` bleibt als direkter Zugang erhalten.
+
+## Rollback auf den Python-Stand (2026-11-03)
+
+Vor der Go-Portierung wurde das laufende Image gesichert:
+
+| Stand | Image-Tag | Image-ID | Git |
+| --- | --- | --- | --- |
+| Go (aktuell) | `modernize43:0.1.0` | `81787965fb33` | `build/modernize43-go` |
+| Python (vorher) | `modernize43:python-2026-11-03` | `5c707cbca3d2` | `4981c6c` |
+
+Zurückrollen ohne Rebuild:
+
+```sh
+ssh svm-ai
+cd /opt/containers/modernize43
+docker tag modernize43:python-2026-11-03 modernize43:0.1.0
+docker compose up -d --no-build --force-recreate
+```
+
+Danach `http://100.64.0.18:8095/healthz` prüfen. Das Image bleibt unabhängig vom
+Git-Stand erhalten; ein späteres `docker compose up -d --build` baut wieder Go.
+
+Die Python-Implementierung liegt im Git unter `4981c6c` (main vor dem Merge von
+`build/modernize43-go`); die Go-Implementierung unter `build/modernize43-go`.

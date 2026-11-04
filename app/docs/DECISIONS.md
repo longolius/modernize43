@@ -12,16 +12,17 @@
   SD, and is scaled to height 1080. This is the only way to avoid the classic 720×576 squeeze.
 - D-06: Sources at or wider than 16:9 are rejected instead of cropped. The project is about narrow
   archive material; cropping or re-framing a widescreen source would be a different product.
-- D-07: Python standard library HTTP server plus `ffmpeg`/`ffprobe` subprocesses. No web framework
-  and no third-party Python packages, so the tool runs anywhere the media tools exist.
+- D-07: Go standard library HTTP server plus `ffmpeg`/`ffprobe` subprocesses. No web framework,
+  no third-party modules: the build produces one static binary, and the container needs only the
+  media tools at runtime.
 - D-08: Jobs are in memory, one worker, no persistence. A restart loses queued and finished jobs;
   results expire after `--retention-minutes` (60 by default).
 - D-09: The submission blocks loopback, private, link-local and unspecified targets by default.
   `--allow-private-hosts` exists for local testing and is not a production mode.
 - D-10: The server binds `127.0.0.1:8080` by default. Exposure to a network or the internet is out of
   scope and must be arranged outside this project.
-- D-11: The service is single-user with no authentication. It must not be exposed publicly in this
-  revision.
+- D-11: The service is single-user. HTTP Basic Auth is enforced at the reverse proxy, not in the
+  application; the container itself must never be published without that proxy.
 - D-12: Black borders are detected with `cropdetect` on at most the first five seconds and cropped
   before any scaling, capped at 20% per side. Upscaling uses Lanczos plus contrast-adaptive
   sharpening at strength 0.35 on the foreground only; denoising and grain management are not

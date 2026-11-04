@@ -322,7 +322,8 @@
       "depends_on": [
         "C-02"
       ],
-      "source_file": "ARCHITECTURE.md"
+      "source_file": "components/web_interface.md",
+      "component_id": "web_interface"
     },
     {
       "id": "C-02",
@@ -330,19 +331,22 @@
         "C-03",
         "C-04"
       ],
-      "source_file": "ARCHITECTURE.md"
+      "source_file": "components/job_manager.md",
+      "component_id": "job_manager"
     },
     {
       "id": "C-03",
       "depends_on": [
         "C-04"
       ],
-      "source_file": "ARCHITECTURE.md"
+      "source_file": "components/transcoder.md",
+      "component_id": "transcoder"
     },
     {
       "id": "C-04",
       "depends_on": [],
-      "source_file": "ARCHITECTURE.md"
+      "source_file": "components/source_inspector.md",
+      "component_id": "source_inspector"
     }
   ],
   "oracles": [
@@ -375,6 +379,11 @@
     "REQUIREMENTS.md",
     "ACCEPTANCE.md",
     "ARCHITECTURE.md",
-    "DECISIONS.md"
+    "DECISIONS.md",
+    "COMPONENTS.md",
+    "components/web_interface.md",
+    "components/job_manager.md",
+    "components/transcoder.md",
+    "components/source_inspector.md"
   ]
 }

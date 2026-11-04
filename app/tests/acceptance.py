@@ -91,7 +91,7 @@ def wait_health(base, proc, timeout=30):
 
 
 def start_app(port, allow_private, env_extra=None):
-    argv = [sys.executable, "-m", "modernize43", "--port", str(port)]
+    argv = [os.path.join(ROOT, "modernize43"), "--port", str(port)]
     if allow_private:
         argv.append("--allow-private-hosts")
     env = os.environ.copy()

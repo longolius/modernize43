@@ -1,9 +1,9 @@
 {
   "schema_version": "dce.runner/v1",
-  "language": "python",
-  "build": ["python3", "-m", "compileall", "-q", "modernize43"],
-  "developer_test": ["python3", "-c", "import modernize43"],
+  "language": "go",
+  "build": ["go", "build", "-o", "modernize43", "."],
+  "developer_test": ["go", "test", "./..."],
   "acceptance": ["python3", "tests/acceptance.py"],
-  "required_artifact": "modernize43/__main__.py",
+  "required_artifact": "modernize43",
   "timeout_seconds": 600
 }
